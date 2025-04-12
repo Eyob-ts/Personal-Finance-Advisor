@@ -52,7 +52,7 @@ class User extends Authenticatable
     //!Accounts
     public function accounts()
 {
-    return $this->hasMany(Account::class);
+    return $this->hasMany(account::class);
 }
 
 public function transactions()

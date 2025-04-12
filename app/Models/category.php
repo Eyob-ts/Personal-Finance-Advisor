@@ -15,7 +15,7 @@ class category extends Model
 {
     return $this->belongsTo(User::class);
 }
-
+ // A category can have many transactions
 public function transactions()
 {
     return $this->hasMany(Transaction::class);

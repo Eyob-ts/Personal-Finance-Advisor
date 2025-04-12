@@ -8,17 +8,19 @@ use Illuminate\Database\Eloquent\Model;
 class account extends Model
 {
     use HasFactory;
+    protected $table = 'accounts';
 
     protected $fillable = ['user_id', 'name', 'type', 'balance'];
 
     public function user()
-{
-    return $this->belongsTo(User::class);
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 }
 
-public function transactions()
-{
-    return $this->hasMany(Transaction::class);
-}
 
-}
