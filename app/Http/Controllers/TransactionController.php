@@ -27,22 +27,35 @@ class TransactionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    // public function store(StoreTransactionRequest $request)
+    // {
+    // // Create the transaction
+    // $transaction = Auth::user()->transactions()->create($request->validated());
+
+    // // Update the account balance based on transaction type
+    // if ($transaction->type === 'income') {
+    //     $transaction->account->increment('balance', $transaction->amount);
+    // } else {
+    //     $transaction->account->decrement('balance', $transaction->amount);
+    // }
+
+    // // Return the created transaction
+    // return response()->json($transaction, 201);
+    // }
     public function store(StoreTransactionRequest $request)
     {
+        // Create the transaction
+        $transaction = Auth::user()->transactions()->create($request->validated());
 
+        // Update the account balance based on transaction type
+        if ($transaction->type === 'income') {
+            $transaction->account->increment('balance', $transaction->amount);
+        } else {
+            $transaction->account->decrement('balance', $transaction->amount);
+        }
 
-    // Create the transaction
-    $transaction = Auth::user()->transactions()->create($request->validated());
-
-    // Update the account balance based on transaction type
-    if ($transaction->type === 'income') {
-        $transaction->account->increment('balance', $transaction->amount);
-    } else {
-        $transaction->account->decrement('balance', $transaction->amount);
-    }
-
-    // Return the created transaction
-    return response()->json($transaction, 201);
+        // Return the created transaction
+        return response()->json($transaction, 201);
     }
 
     /**

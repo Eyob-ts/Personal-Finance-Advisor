@@ -3,6 +3,9 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Models\Finance\Budget;
+use App\Models\Finance\Goal;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -63,6 +66,16 @@ public function transactions()
 public function categories()
 {
     return $this->hasMany(Category::class);
+}
+
+public function budgets()
+{
+    return $this->hasMany(Budget::class);
+}
+
+public function goals()
+{
+    return $this->hasMany(Goal::class);
 }
 
 public function getBalanceAttribute()
