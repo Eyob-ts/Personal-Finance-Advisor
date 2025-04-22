@@ -15,13 +15,22 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
+        // Global middleware
+        $middleware->use([
+            \Illuminate\Http\Middleware\HandleCors::class,
+        ]);
 
-        $middleware->web(append: [
+        // Web middleware group
+        $middleware->web([
+            \Illuminate\Cookie\Middleware\EncryptCookies::class,
+            \Illuminate\Session\Middleware\StartSession::class,
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
+
+        // Cookie exceptions
+        $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
