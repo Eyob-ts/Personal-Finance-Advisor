@@ -1,12 +1,19 @@
 
-import './App.css'
+import { BrowserRouter } from 'react-router-dom'
+
+import { AuthProvider } from './features/Auth/AuthContext'
+import { AppRoutes } from './routes'
+import { Toaster } from 'react-hot-toast'
+import DarkModeToggle from './components/DarkModeToggle'
 
 function App() {
 
   return (
-   <div>
-    <h1 className="text-[80px] text-gray-600 font-merriweather"> hellloooo Personal Finance</h1>
-   </div>
+    <AuthProvider>
+    <AppRoutes />
+    <Toaster position="top-center" reverseOrder={false} />
+    <DarkModeToggle />
+  </AuthProvider>
   )
 }
 
