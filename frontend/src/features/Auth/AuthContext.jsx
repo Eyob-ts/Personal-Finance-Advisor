@@ -1,4 +1,4 @@
-import { createContext, useContext,  useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import axios from '../../lib/Axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -6,7 +6,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
@@ -23,8 +23,12 @@ export const AuthProvider = ({ children }) => {
       // Then attempt login
       const response = await axios.post('/api/login', credentials);
 
-      // If successful, set user from response and redirect
-      setUser(response.data.user || { email: credentials.email });
+      // Store the token and user data
+      localStorage.setItem('auth_token', response.data.token);
+      localStorage.setItem('auth_user', JSON.stringify(response.data.user));
+
+      // Set user in context
+      setUser(response.data.user);
       navigate('/dashboard');
     } catch (err) {
       console.error('Login error:', err);
@@ -49,8 +53,12 @@ export const AuthProvider = ({ children }) => {
         password_confirmation: credentials.password
       });
 
-      // If successful, set user from response and redirect
-      setUser(response.data.user || { email: credentials.email });
+      // Store the token and user data
+      localStorage.setItem('auth_token', response.data.token);
+      localStorage.setItem('auth_user', JSON.stringify(response.data.user));
+
+      // Set user in context
+      setUser(response.data.user);
       navigate('/dashboard');
     } catch (err) {
       console.error('Registration error:', err);
@@ -63,33 +71,63 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      setLoading(true);
-      await axios.post('/logout');
-      setUser(null);
-      navigate('/login');
+      await axios.post('/api/logout');
     } catch (err) {
       console.error('Logout error:', err);
-      setError('Failed to logout');
     } finally {
-      setLoading(false);
+      // Clear auth data
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+      setUser(null);
+      navigate('/login');
     }
   };
 
+  // Check if user is already logged in
+  const checkAuth = async () => {
+    const storedToken = localStorage.getItem('auth_token');
+
+    if (storedToken) {
+      try {
+        // Validate token with the server
+        const response = await axios.get('/api/user');
+        setUser(response.data.user);
+      } catch (err) {
+        console.error('Token validation error:', err);
+        // If token is invalid, clear it
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_user');
+        setUser(null);
+      }
+    }
+
+    setLoading(false);
+  };
+
+  // Call checkAuth when component mounts
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        error,
-        login,
-        register,
-        logout,
-        clearError
-      }}
-    >
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      error,
+      login,
+      register,
+      logout,
+      clearError
+    }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

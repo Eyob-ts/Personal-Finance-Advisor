@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Finance\AnalyticsController;
 use App\Http\Controllers\Finance\BudgetController;
 use App\Http\Controllers\Finance\GoalController;
@@ -16,6 +17,13 @@ Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout']);
 
 // Protected Routes (require auth)
+
+/**
+ * User
+ */
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('user', [AuthController::class, 'user']);
+});
 
 /**
  * Account
@@ -82,7 +90,12 @@ Route::middleware('auth:sanctum')->get('/analytics', [AnalyticsController::class
 
 //Route::middleware('auth:sanctum')->get('/reports/summary', [ReportController::class, 'summary']);
 
-
+Route::middleware('auth:sanctum')->prefix('dashboard')->group(function () {
+    Route::get('summary', [DashboardController::class, 'summary']);
+    Route::get('recent', [DashboardController::class, 'recent']);
+    Route::get('spending', [DashboardController::class, 'spendingByCategory']);
+    Route::get('trend', [DashboardController::class, 'monthlyTrend']);
+});
 
 // Health check
 Route::get('/', function () {
