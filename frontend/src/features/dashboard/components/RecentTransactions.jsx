@@ -1,46 +1,96 @@
 import { useQuery } from '@tanstack/react-query';
 import { getRecentTransactions } from '../dashboardApi';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-const TransactionRow = ({ transaction }) => {
+const TransactionRow = ({ transaction, index }) => {
   const isIncome = transaction.type === 'income';
   const Icon = isIncome ? ArrowUpRight : ArrowDownRight;
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'ETB'
     }).format(value || 0);
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
+    console.log('Raw date:', dateString);
+    try {
+      // Try different date formats
+      let date;
+
+      // First try standard ISO format
+      date = new Date(dateString);
+
+      // If that fails, try Laravel datetime format (YYYY-MM-DD HH:MM:SS)
+      if (isNaN(date.getTime()) && typeof dateString === 'string') {
+        const parts = dateString.split(' ');
+        if (parts.length === 2) {
+          const [datePart, timePart] = parts;
+          const [year, month, day] = datePart.split('-');
+          const [hour, minute, second] = timePart.split(':');
+          date = new Date(year, month - 1, day, hour, minute, second);
+        }
+      }
+
+      if (isNaN(date.getTime())) {
+        // Try ISO format with hyphens replaced
+        const dateISO = new Date(dateString.replace(/-/g, '/'));
+        if (!isNaN(dateISO.getTime())) {
+          date = dateISO;
+        }
+      }
+
+      if (isNaN(date.getTime())) {
+        // Try timestamp format
+        const dateTimestamp = new Date(parseInt(dateString));
+        if (!isNaN(dateTimestamp.getTime())) {
+          date = dateTimestamp;
+        }
+      }
+
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        });
+      }
+
+      console.error('Failed to parse date:', dateString);
+      return '-'; // Return dash if date cannot be parsed
+    } catch (error) {
+      console.error('Error parsing date:', error);
+      return '-'; // Return dash if parsing fails
+    }
   };
 
   return (
-    <tr className="border-b last:border-b-0">
+    <motion.tr
+      className="border-b last:border-b-0 hover:bg-gray-50 transition-colors"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.05 }}
+    >
       <td className="py-4">
         <div className="flex items-center">
-          <div className={`p-2 rounded-full ${isIncome ? 'bg-green-100' : 'bg-red-100'}`}>
-            <Icon className={`w-4 h-4 ${isIncome ? 'text-green-600' : 'text-red-600'}`} />
+          <div className={`p-2 rounded-full ${isIncome ? 'bg-emerald-100' : 'bg-rose-100'}`}>
+            <Icon className={`w-4 h-4 ${isIncome ? 'text-emerald-600' : 'text-rose-600'}`} />
           </div>
           <div className="ml-4">
-            <p className="font-medium">{transaction.description}</p>
-            <p className="text-sm text-gray-500">{transaction.category}</p>
+            <p className="font-semibold text-gray-800">{transaction.description}</p>
+            <p className="text-xs text-gray-500">{transaction.category}</p>
           </div>
         </div>
       </td>
       <td className="py-4">
-        <span className={`font-medium ${isIncome ? 'text-green-600' : 'text-red-600'}`}>
+        <span className={`font-semibold ${isIncome ? 'text-emerald-600' : 'text-rose-600'}`}>
           {isIncome ? '+' : '-'}{formatCurrency(transaction.amount)}
         </span>
       </td>
-      <td className="py-4 text-gray-500">{formatDate(transaction.date)}</td>
-    </tr>
+      <td className="py-4 text-sm text-gray-500">{formatDate(transaction.transaction_date)}</td>
+    </motion.tr>
   );
 };
 
@@ -49,6 +99,10 @@ const RecentTransactions = () => {
     queryKey: ['recentTransactions'],
     queryFn: getRecentTransactions
   });
+
+  console.log('RecentTransactions data:', data);
+  console.log('RecentTransactions isLoading:', isLoading);
+  console.log('RecentTransactions error:', error);
 
   if (isLoading) {
     return (
@@ -71,7 +125,7 @@ const RecentTransactions = () => {
     );
   }
 
-  if (!data?.transactions?.length) {
+  if (!data) {
     return (
       <div className="bg-white rounded-xl shadow-sm p-6 text-center">
         <h3 className="text-lg font-semibold mb-2">Recent Transactions</h3>
@@ -82,19 +136,27 @@ const RecentTransactions = () => {
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">
-      <h3 className="text-lg font-semibold mb-6">Recent Transactions</h3>
+      <motion.h3
+        className="text-lg font-bold mb-6 text-gray-800"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        Recent Transactions
+      </motion.h3>
+
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="text-left text-sm text-gray-500 border-b">
-              <th className="pb-4">Transaction</th>
-              <th className="pb-4">Amount</th>
-              <th className="pb-4">Date</th>
+            <tr className="text-left text-sm text-gray-400 border-b">
+              <th className="pb-3 font-medium tracking-wide">Transaction</th>
+              <th className="pb-3 font-medium tracking-wide">Amount</th>
+              <th className="pb-3 font-medium tracking-wide">Date</th>
             </tr>
           </thead>
           <tbody>
-            {data.transactions.map((transaction) => (
-              <TransactionRow key={transaction.id} transaction={transaction} />
+            {data.map((transaction, index) => (
+              <TransactionRow key={transaction.id} transaction={transaction} index={index} />
             ))}
           </tbody>
         </table>

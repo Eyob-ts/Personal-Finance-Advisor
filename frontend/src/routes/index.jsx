@@ -8,6 +8,7 @@ import DashboardPage from "../features/dashboard/pages/DashboardPage";
 import AccountsPage from "../features/accounts/pages/AccountPage";
 import TransactionsPage from "../features/transactions/pages/TransactionsPage";
 import GoalsPage from "../features/goals/pages/GoalsPage";
+import BudgetsPage from "../features/budgets/pages/BudgetsPage";
 
 export const AppRoutes = () => {
   return (
@@ -24,6 +25,7 @@ export const AppRoutes = () => {
           <Route path="accounts" element={<AccountsPage />} />
           <Route path="transactions" element={<TransactionsPage />} />
           <Route path="goals" element={<GoalsPage />} />
+          <Route path="budgets" element={<BudgetsPage />} />
         </Route>
       </Route>
     </Routes>

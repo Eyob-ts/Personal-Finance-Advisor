@@ -25,7 +25,7 @@ const MonthlyTrends = () => {
     );
   }
 
-  if (!data?.trends?.length) {
+  if (!data) {
     return (
       <div className="bg-white rounded-xl shadow-sm p-6 text-center">
         <h3 className="text-lg font-semibold mb-2">Monthly Trends</h3>
@@ -37,15 +37,48 @@ const MonthlyTrends = () => {
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'ETB'
     }).format(value || 0);
+  };
+
+  const formatDate = (dateString) => {
+    console.log('Raw month:', dateString);
+    try {
+      // Try different date formats
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        // Try ISO format
+        const dateISO = new Date(dateString.replace(/-/g, '/'));
+        if (!isNaN(dateISO.getTime())) {
+          return dateISO.toLocaleDateString('en-US', {
+            month: 'short',
+            year: 'numeric'
+          });
+        }
+        // Try timestamp format
+        const dateTimestamp = new Date(parseInt(dateString));
+        if (!isNaN(dateTimestamp.getTime())) {
+          return dateTimestamp.toLocaleDateString('en-US', {
+            month: 'short',
+            year: 'numeric'
+          });
+        }
+      }
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        year: 'numeric'
+      });
+    } catch (error) {
+      console.error('Error parsing month:', error);
+      return dateString; // Return raw date if parsing fails
+    }
   };
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white p-3 rounded-lg shadow-md border">
-          <p className="font-semibold">{label}</p>
+          <p className="font-semibold">{formatDate(label)}</p>
           <p className="text-green-600">Income: {formatCurrency(payload[0].value)}</p>
           <p className="text-red-600">Expenses: {formatCurrency(payload[1].value)}</p>
         </div>
@@ -59,9 +92,9 @@ const MonthlyTrends = () => {
       <h3 className="text-lg font-semibold mb-6">Monthly Trends</h3>
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data.trends} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+          <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
+            <XAxis dataKey="month" tickFormatter={formatDate} />
             <YAxis tickFormatter={(value) => formatCurrency(value)} />
             <Tooltip content={<CustomTooltip />} />
             <Legend />
