@@ -35,12 +35,12 @@ const AccountForm = ({ initialData, onSubmit, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 backdrop-blur-sm">
-      <div className="bg-gradient-to-br from-[#01332B] to-[#001A16] p-8 rounded-xl shadow-2xl w-96 border border-teal-400/20 relative overflow-hidden">
+      <div className="bg-gradient-to-br from-[#01332B] to-[#001A16] p-4 sm:p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-xs sm:max-w-md md:w-96 border border-teal-400/20 relative overflow-y-auto max-h-[90vh]">
         {/* Holographic effect */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-teal-400 to-transparent opacity-30"></div>
 
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-teal-100 font-orbitron tracking-wider">
+        <div className="flex justify-between items-center mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-bold text-teal-100 font-orbitron tracking-wider">
             {initialData ? "EDIT ACCOUNT" : "NEW ACCOUNT"}
           </h2>
           <button
@@ -52,13 +52,13 @@ const AccountForm = ({ initialData, onSubmit, onClose }) => {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="mb-5">
-            <label className="block text-sm font-medium text-teal-200 mb-2 font-rajdhani tracking-wide">
+          <div className="mb-4 sm:mb-5">
+            <label className="block text-xs sm:text-sm font-medium text-teal-200 mb-1 sm:mb-2 font-rajdhani tracking-wide">
               ACCOUNT NAME
             </label>
             <div className="relative">
               <input
-                className="w-full bg-[#002822] border border-teal-800 rounded-lg px-4 py-3 text-teal-100 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-500/50 transition-all duration-200"
+                className="w-full bg-[#002822] border border-teal-800 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-teal-100 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-500/50 transition-all duration-200"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -68,12 +68,12 @@ const AccountForm = ({ initialData, onSubmit, onClose }) => {
             </div>
           </div>
 
-          <div className="mb-5">
-            <label className="block text-sm font-medium text-teal-200 mb-2 font-rajdhani tracking-wide">
+          <div className="mb-4 sm:mb-5">
+            <label className="block text-xs sm:text-sm font-medium text-teal-200 mb-1 sm:mb-2 font-rajdhani tracking-wide">
               BALANCE
             </label>
             <input
-              className="w-full bg-[#002822] border border-teal-800 rounded-lg px-4 py-3 text-teal-100 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-500/50 transition-all duration-200"
+              className="w-full bg-[#002822] border border-teal-800 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-teal-100 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-500/50 transition-all duration-200"
               type="number"
               value={balance}
               onChange={(e) => setBalance(e.target.value)}
@@ -81,13 +81,13 @@ const AccountForm = ({ initialData, onSubmit, onClose }) => {
             />
           </div>
 
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-teal-200 mb-2 font-rajdhani tracking-wide">
+          <div className="mb-5 sm:mb-6">
+            <label className="block text-xs sm:text-sm font-medium text-teal-200 mb-1 sm:mb-2 font-rajdhani tracking-wide">
               ACCOUNT TYPE
             </label>
             <div className="relative">
               <select
-                className="w-full bg-[#002822] border border-teal-800 rounded-lg px-4 py-3 text-teal-100 appearance-none focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-500/50 transition-all duration-200"
+                className="w-full bg-[#002822] border border-teal-800 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-teal-100 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-500/50 transition-all duration-200"
                 value={type}
                 onChange={(e) => setType(e.target.value)}
                 required
@@ -102,19 +102,19 @@ const AccountForm = ({ initialData, onSubmit, onClose }) => {
             </div>
           </div>
 
-          <div className="flex justify-end gap-3">
+          <div className="flex justify-end gap-2 sm:gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 bg-transparent border border-red-500/50 text-red-400 rounded-lg hover:bg-red-900/30 hover:text-red-300 transition-all duration-300 font-rajdhani font-medium tracking-wide"
+              className="px-4 sm:px-5 py-2 sm:py-2.5 bg-transparent border border-red-500/50 text-red-400 rounded-lg hover:bg-red-900/30 hover:text-red-300 transition-all duration-300 font-rajdhani font-medium tracking-wide text-sm sm:text-base"
             >
               CANCEL
             </button>
             <button
               type="submit"
-              className="px-6 py-2.5 bg-teal-600/90 text-white rounded-lg hover:bg-teal-500 flex items-center gap-2 group hover:shadow-lg hover:shadow-teal-500/20 transition-all duration-300 font-rajdhani font-medium tracking-wide"
+              className="px-4 sm:px-6 py-2 sm:py-2.5 bg-teal-600/90 text-white rounded-lg hover:bg-teal-500 flex items-center gap-2 group hover:shadow-lg hover:shadow-teal-500/20 transition-all duration-300 font-rajdhani font-medium tracking-wide text-sm sm:text-base"
             >
-              <FaSave className="transition-transform duration-300 group-hover:scale-110" />
+              <FaSave className="transition-transform duration-300 group-hover:scale-110 text-sm sm:text-base" />
               {initialData ? "UPDATE" : "CREATE"}
             </button>
           </div>

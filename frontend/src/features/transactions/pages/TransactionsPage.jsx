@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaCoins, FaExchangeAlt } from "react-icons/fa";
 import TransactionList from "../components/TransactionList";
 import TransactionForm from "../components/TransactionForm";
 import TransactionFilters from "../components/TransactionFilters";
@@ -41,7 +41,6 @@ const TransactionsPage = () => {
         getAccounts(),
         getCategories(),
       ]);
-      console.log("Fetched transactions:", transactionsData);
       setTransactions(transactionsData);
       setAccounts(accountsData);
       setCategories(categoriesData);
@@ -123,55 +122,98 @@ const TransactionsPage = () => {
     );
   });
 
-  console.log("Filtered transactions:", filteredTransactions);
-
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-[#001A16] to-[#000F0C]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+      <div className="bg-red-900/30 border border-red-500/50 text-red-400 px-4 py-3 rounded relative font-rajdhani">
         {error}
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Transactions</h1>
+    <div className="p-3 sm:p-4 md:p-6 min-h-screen bg-gradient-to-br from-[#001A16] to-[#000F0C]">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3 sm:gap-0">
+        <div className="flex items-center">
+          <FaExchangeAlt className="text-teal-400 mr-2 sm:mr-3 text-xl sm:text-2xl" />
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-teal-100 font-orbitron tracking-wider">
+            TRANSACTION MANAGEMENT
+          </h1>
+        </div>
+
         <button
-          onClick={() => setShowForm(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700"
+          onClick={() => {
+            setSelectedTransaction(null);
+            setShowForm(true);
+          }}
+          className="w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-3 bg-teal-600/90 text-white rounded-lg hover:bg-teal-500 flex items-center justify-center gap-2 group hover:shadow-lg hover:shadow-teal-500/20 transition-all duration-300 font-rajdhani font-medium tracking-wide text-sm sm:text-base"
         >
-          <FaPlus /> New Transaction
+          <FaPlus className="transition-transform duration-300 group-hover:rotate-90" />
+          NEW TRANSACTION
         </button>
       </div>
 
-      <TransactionFilters
-        filters={filters}
-        onFilterChange={handleFilterChange}
-        accounts={accounts}
-        categories={categories}
-      />
-
-      {transactions.length === 0 ? (
-        <div className="bg-white p-6 rounded-lg shadow-md text-center">
-          <p className="text-gray-500">No transactions found. Create your first transaction!</p>
+      {/* Stats Bar */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
+        <div className="glass-panel p-2 sm:p-3 md:p-4 rounded-xl border border-teal-800/50 col-span-2 sm:col-span-1">
+          <h3 className="text-teal-300 font-rajdhani text-xs sm:text-sm uppercase tracking-wider">Total Transactions</h3>
+          <p className="text-lg sm:text-xl md:text-2xl font-bold text-white font-orbitron">{transactions.length}</p>
         </div>
-      ) : (
+        <div className="glass-panel p-2 sm:p-3 md:p-4 rounded-xl border border-teal-800/50">
+          <h3 className="text-teal-300 font-rajdhani text-xs sm:text-sm uppercase tracking-wider">Income</h3>
+          <p className="text-lg sm:text-xl md:text-2xl font-bold text-white font-orbitron">
+            ${transactions
+              .filter(t => t.type === 'income')
+              .reduce((sum, t) => sum + parseFloat(t.amount), 0)
+              .toFixed(2)}
+          </p>
+        </div>
+        <div className="glass-panel p-2 sm:p-3 md:p-4 rounded-xl border border-teal-800/50">
+          <h3 className="text-teal-300 font-rajdhani text-xs sm:text-sm uppercase tracking-wider">Expenses</h3>
+          <p className="text-lg sm:text-xl md:text-2xl font-bold text-white font-orbitron">
+            ${transactions
+              .filter(t => t.type === 'expense')
+              .reduce((sum, t) => sum + parseFloat(t.amount), 0)
+              .toFixed(2)}
+          </p>
+        </div>
+        <div className="glass-panel p-2 sm:p-3 md:p-4 rounded-xl border border-teal-800/50">
+          <h3 className="text-teal-300 font-rajdhani text-xs sm:text-sm uppercase tracking-wider">Last Updated</h3>
+          <p className="text-sm sm:text-base md:text-lg font-medium text-white font-rajdhani">
+            {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+          </p>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="mb-4 sm:mb-6">
+        <TransactionFilters
+          filters={filters}
+          onFilterChange={handleFilterChange}
+          accounts={accounts}
+          categories={categories}
+        />
+      </div>
+
+      {/* Main Table */}
+      <div className="mb-6 sm:mb-8">
         <TransactionList
           transactions={filteredTransactions}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          accounts={accounts}
         />
-      )}
+      </div>
 
+      {/* Form Modal */}
       {showForm && (
         <TransactionForm
           initialData={selectedTransaction}
@@ -184,6 +226,11 @@ const TransactionsPage = () => {
           categories={categories}
         />
       )}
+
+      {/* Footer Note */}
+      <div className="text-center text-teal-700/80 text-xs font-rajdhani mt-6 sm:mt-8">
+        <p>SYSTEM VERSION 2.3.8 | SECURE CONNECTION ESTABLISHED</p>
+      </div>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getRecentTransactions } from '../dashboardApi';
-import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const TransactionRow = ({ transaction, index }) => {
@@ -10,20 +10,14 @@ const TransactionRow = ({ transaction, index }) => {
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'ETB'
+      currency: 'ETB',
+      minimumFractionDigits: 2
     }).format(value || 0);
   };
 
   const formatDate = (dateString) => {
-    console.log('Raw date:', dateString);
     try {
-      // Try different date formats
-      let date;
-
-      // First try standard ISO format
-      date = new Date(dateString);
-
-      // If that fails, try Laravel datetime format (YYYY-MM-DD HH:MM:SS)
+      let date = new Date(dateString);
       if (isNaN(date.getTime()) && typeof dateString === 'string') {
         const parts = dateString.split(' ');
         if (parts.length === 2) {
@@ -34,62 +28,47 @@ const TransactionRow = ({ transaction, index }) => {
         }
       }
 
-      if (isNaN(date.getTime())) {
-        // Try ISO format with hyphens replaced
-        const dateISO = new Date(dateString.replace(/-/g, '/'));
-        if (!isNaN(dateISO.getTime())) {
-          date = dateISO;
-        }
-      }
-
-      if (isNaN(date.getTime())) {
-        // Try timestamp format
-        const dateTimestamp = new Date(parseInt(dateString));
-        if (!isNaN(dateTimestamp.getTime())) {
-          date = dateTimestamp;
-        }
-      }
-
       if (!isNaN(date.getTime())) {
         return date.toLocaleDateString('en-US', {
           month: 'short',
-          day: 'numeric',
-          year: 'numeric'
+          day: 'numeric'
         });
       }
-
-      console.error('Failed to parse date:', dateString);
-      return '-'; // Return dash if date cannot be parsed
+      return '-';
     } catch (error) {
-      console.error('Error parsing date:', error);
-      return '-'; // Return dash if parsing fails
+      return '-';
     }
   };
 
   return (
     <motion.tr
-      className="border-b last:border-b-0 hover:bg-gray-50 transition-colors"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
+      className="border-b border-teal-800/30 last:border-b-0 hover:bg-teal-900/10 transition-colors duration-200"
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
     >
-      <td className="py-4">
+      <td className="py-4 px-3 whitespace-nowrap">
         <div className="flex items-center">
-          <div className={`p-2 rounded-full ${isIncome ? 'bg-emerald-100' : 'bg-rose-100'}`}>
-            <Icon className={`w-4 h-4 ${isIncome ? 'text-emerald-600' : 'text-rose-600'}`} />
+          <div className={`p-2 rounded-lg ${isIncome ? 'bg-teal-900/30 text-teal-300 border border-teal-400/30' : 'bg-red-900/30 text-red-300 border border-red-400/30'}`}>
+            <Icon className={`w-4 h-4 ${isIncome ? 'text-teal-400' : 'text-red-400'}`} />
           </div>
           <div className="ml-4">
-            <p className="font-semibold text-gray-800">{transaction.description}</p>
-            <p className="text-xs text-gray-500">{transaction.category}</p>
+            <p className="font-rajdhani text-teal-100 text-sm line-clamp-1">{transaction.description}</p>
+            <p className="text-xs text-teal-500/80 font-rajdhani">{transaction.category}</p>
           </div>
         </div>
       </td>
-      <td className="py-4">
-        <span className={`font-semibold ${isIncome ? 'text-emerald-600' : 'text-rose-600'}`}>
+      <td className="py-4 px-3">
+        <span className={`font-rajdhani font-semibold ${isIncome ? 'text-teal-400' : 'text-red-400'}`}>
           {isIncome ? '+' : '-'}{formatCurrency(transaction.amount)}
         </span>
       </td>
-      <td className="py-4 text-sm text-gray-500">{formatDate(transaction.transaction_date)}</td>
+      <td className="py-4 px-3 text-sm text-teal-300/70 font-rajdhani">
+        <div className="flex items-center">
+          <Clock className="w-3 h-3 mr-1 text-teal-500/50" />
+          {formatDate(transaction.transaction_date)}
+        </div>
+      </td>
     </motion.tr>
   );
 };
@@ -100,58 +79,69 @@ const RecentTransactions = () => {
     queryFn: getRecentTransactions
   });
 
-  console.log('RecentTransactions data:', data);
-  console.log('RecentTransactions isLoading:', isLoading);
-  console.log('RecentTransactions error:', error);
-
   if (isLoading) {
     return (
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <div className="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="glass-panel rounded-xl p-6 border border-teal-800/50"
+      >
+        <div className="h-4 bg-teal-900/50 rounded-full w-1/3 mb-6 animate-pulse"></div>
         <div className="space-y-4">
           {[...Array(5)].map((_, index) => (
-            <div key={index} className="h-16 bg-gray-200 rounded animate-pulse"></div>
+            <div key={index} className="h-16 bg-teal-900/30 rounded-lg animate-pulse"></div>
           ))}
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 text-red-600 p-4 rounded-lg">
-        Error loading transactions: {error.message}
-      </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="bg-red-900/30 text-red-400 p-4 rounded-lg border border-red-500/30 font-rajdhani"
+      >
+        SYSTEM ALERT: Failed to load transactions ({error.message})
+      </motion.div>
     );
   }
 
-  if (!data) {
+  if (!data || data.length === 0) {
     return (
-      <div className="bg-white rounded-xl shadow-sm p-6 text-center">
-        <h3 className="text-lg font-semibold mb-2">Recent Transactions</h3>
-        <p className="text-gray-500">No recent transactions</p>
-      </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="glass-panel rounded-xl p-6 border border-teal-800/50 text-center"
+      >
+        <h3 className="text-lg font-bold font-orbitron text-teal-100 mb-2">RECENT TRANSACTIONS</h3>
+        <p className="text-teal-300/70 font-rajdhani">No transaction history available</p>
+      </motion.div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6">
-      <motion.h3
-        className="text-lg font-bold mb-6 text-gray-800"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-      >
-        Recent Transactions
-      </motion.h3>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="glass-panel rounded-xl p-6 border border-teal-800/50 hover:border-teal-400/30 transition-all"
+    >
+      <div className="flex items-center mb-6">
+        <div className="w-1 h-8 bg-teal-400 mr-3 rounded-full"></div>
+        <h3 className="text-xl font-bold font-orbitron text-teal-100 tracking-wider">
+          TRANSACTION LOG
+        </h3>
+      </div>
 
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="text-left text-sm text-gray-400 border-b">
-              <th className="pb-3 font-medium tracking-wide">Transaction</th>
-              <th className="pb-3 font-medium tracking-wide">Amount</th>
-              <th className="pb-3 font-medium tracking-wide">Date</th>
+            <tr className="text-left text-sm text-teal-300/80 font-rajdhani border-b border-teal-800/30">
+              <th className="pb-3 font-medium tracking-wider pl-3">TRANSACTION</th>
+              <th className="pb-3 font-medium tracking-wider">AMOUNT</th>
+              <th className="pb-3 font-medium tracking-wider pr-3">DATE</th>
             </tr>
           </thead>
           <tbody>
@@ -161,7 +151,12 @@ const RecentTransactions = () => {
           </tbody>
         </table>
       </div>
-    </div>
+
+      <div className="mt-6 text-xs text-teal-500/50 font-rajdhani tracking-wider flex justify-between">
+        <p>LAST UPDATED: {new Date().toLocaleString()}</p>
+        <p>SHOWING: {data.length} RECORDS</p>
+      </div>
+    </motion.div>
   );
 };
 

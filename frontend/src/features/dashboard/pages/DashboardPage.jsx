@@ -9,26 +9,26 @@ const queryClient = new QueryClient();
 const DashboardPage = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-gradient-to-br from-[#01332B] to-[#025C4F] text-white">
-        <div className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-8 py-2 bg-gradient-to-r from-[#04B4A0] to-[#01332B] bg-clip-text text-transparent">
+      <div className="min-h-screen  bg-gradient-to-br from-[#001A16] to-[#01332B] text-white">
+        <div className="container mx-auto px-3 sm:px-4  py-6 sm:py-8">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 py-2 bg-gradient-to-r from-teal-400 to-[#01332B] bg-clip-text text-transparent font-orbitron tracking-wide">
             Dashboard
           </h1>
 
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             <SummarySection />
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 shadow-lg">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+              <div className="bg-[#01332B]/80  backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-teal-800/20 shadow-lg">
                 <SpendingByCategory />
               </div>
 
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 shadow-lg">
+              <div className="bg-[#01332B]/80 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-teal-800/30 shadow-lg">
                 <MonthlyTrends />
               </div>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 shadow-lg">
+            <div className="bg-[#01332B]/80 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-teal-800/30 shadow-lg">
               <RecentTransactions />
             </div>
           </div>

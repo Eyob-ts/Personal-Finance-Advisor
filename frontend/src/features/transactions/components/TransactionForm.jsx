@@ -48,15 +48,15 @@ const TransactionForm = ({ initialData, onSubmit, onClose, accounts, categories 
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-[500px]">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 backdrop-blur-sm">
+      <div className="bg-gradient-to-br from-[#01332B] to-[#001A16] p-8 rounded-lg shadow-2xl shadow-black w-[500px] border-teal-400/20 relative overflow-hidden">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-bold text-teal-100 font-orbitron tracking-wide ">
             {initialData ? "Edit Transaction" : "New Transaction"}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-teal-300 hover:text-white transition-colors duration-300"
           >
             <FaTimes size={20} />
           </button>
@@ -64,26 +64,26 @@ const TransactionForm = ({ initialData, onSubmit, onClose, accounts, categories 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
+              <label className="block text-sm font-medium text-teal-300 mb-2 font-rajdhani tracking-wide">Type</label>
               <select
                 name="type"
                 value={formData.type}
                 onChange={handleChange}
-                className="w-full border-gray-300 border rounded-lg px-4 py-2"
+                className="w-full bg-[#002822] border border-teal-700 rounded-lg px-4 py-3 text-teal-00 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-500/50 transition-all duration-200 font-rajdhani"
                 required
               >
-                <option value="expense">Expense</option>
+                <option className="bg-[#001A16] hover:bg-[#01332B]" value="expense">Expense</option>
                 <option value="income">Income</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Amount</label>
+              <label className="block text-sm font-medium text-teal-300 mb-2 font-rajdhani tracking-wide">Amount</label>
               <input
                 type="number"
                 name="amount"
                 value={formData.amount}
                 onChange={handleChange}
-                className="w-full border-gray-300 border rounded-lg px-4 py-2"
+                className="w-full bg-[#002822] border border-teal-700 rounded-lg px-4 py-3 text-teal-00 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-500/50 transition-all duration-200 font-rajdhani"
                 step="0.01"
                 min="0"
                 required
@@ -92,25 +92,25 @@ const TransactionForm = ({ initialData, onSubmit, onClose, accounts, categories 
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
+            <label className="block text-sm font-medium text-teal-300 mb-2 font-rajdhani tracking-wide">Date</label>
             <input
               type="date"
               name="date"
               value={formData.date}
               onChange={handleChange}
-              className="w-full border-gray-300 border rounded-lg px-4 py-2"
+              className="w-full bg-[#002822] border border-teal-700 rounded-lg px-4 py-3 text-teal-00 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-500/50 transition-all duration-200 font-rajdhani"
               required
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Account</label>
+              <label className="block text-sm font-medium text-teal-800 mb-2 font-rajdhani tracking-wide">Account</label>
               <select
                 name="account_id"
                 value={formData.account_id}
                 onChange={handleChange}
-                className="w-full border-gray-300 border rounded-lg px-4 py-2"
+                className="w-full bg-[#002822] border border-teal-700 rounded-lg px-4 py-3 text-teal-00 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-500/50 transition-all duration-200 font-rajdhani"
                 required
               >
                 <option value="">Select Account</option>
@@ -122,12 +122,12 @@ const TransactionForm = ({ initialData, onSubmit, onClose, accounts, categories 
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+              <label className="block text-sm font-medium text-teal-800 mb-2 font-rajdhani tracking-wide">Category</label>
               <select
                 name="category_id"
                 value={formData.category_id}
                 onChange={handleChange}
-                className="w-full border-gray-300 border rounded-lg px-4 py-2"
+                className="w-full bg-[#002822] border border-teal-700 rounded-lg px-4 py-3 text-teal-00 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-500/50 transition-all duration-200 font-rajdhani"
                 required
               >
                 <option value="">Select Category</option>
@@ -141,12 +141,12 @@ const TransactionForm = ({ initialData, onSubmit, onClose, accounts, categories 
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+            <label className="block text-sm font-medium text-teal-800 mb-2 font-rajdhani tracking-wide">Description</label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
-              className="w-full border-gray-300 border rounded-lg px-4 py-2"
+              className="w-full bg-[#002822] border border-teal-700 rounded-lg px-4 py-3 text-teal-00 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-500/50 transition-all duration-200 font-rajdhani"
               rows="3"
               placeholder="Enter transaction description"
             />
@@ -156,15 +156,15 @@ const TransactionForm = ({ initialData, onSubmit, onClose, accounts, categories 
             <button
               type="button"
               onClick={onClose}
-              className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
-            >
+              className="px-5 py-2.5 bg-transparent border border-red-500/50 text-red-400 rounded-lg hover:bg-red-900/30 hover:text-red-300 transition-all duration-300 font-rajdhani front-medium tracking-wide">
               Cancel
             </button>
             <button
               type="submit"
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700"
+              className="px-6 py-2.5 bg-teal-600/90 text-white rounded-lg hover:bg-teal-500 flex items-center gap-2 group hover:shadow-lg hover:shadow-teal-500/20 transition-all duration-300 font-rajdhani font-medium tracking-wide"
             >
-              <FaSave /> {initialData ? "Update" : "Create"}
+              <FaSave className="transition-transform duration-300 group-hover:scale-110"
+              /> {initialData ? "Update" : "Create"}
             </button>
           </div>
         </form>

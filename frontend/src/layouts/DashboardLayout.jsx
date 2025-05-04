@@ -35,7 +35,7 @@ const DashboardLayout = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-[#f0f9ff] to-[#e0f2fe]">
+    <div className="flex h-screen bg-gradient-to-br from-[#01332B] to-[#025C4F]">
       {/* Mobile sidebar backdrop */}
       {isSidebarOpen && (
         <div
@@ -93,17 +93,17 @@ const DashboardLayout = () => {
       </motion.aside>
 
       {/* Main content */}
-      <div className="flex flex-col flex-1 lg:pl-64">
+      <div className="flex flex-col flex-1 lg:pl-64 bg-gradient-to-br from-[#01332B] to-[#025C4F] text-white">
         {/* Header */}
-        <header className="sticky top-0 z-10 flex items-center justify-between h-16 px-6 bg-white/80 backdrop-blur-sm border-b border-gray-200">
+        <header className="sticky top-0 z-10 flex items-center justify-between h-16 px-6 bg-[#01332B] backdrop-blur-sm border-b border-gray-200">
           <button
-            className="lg:hidden text-gray-600 hover:text-gray-900"
+            className="lg:hidden text-white/25 hover:text-gray-900"
             onClick={() => setIsSidebarOpen(true)}
           >
             <Menu size={24} />
           </button>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 ">
             <button className="p-2 text-gray-500 rounded-full hover:bg-gray-100 transition-colors">
               <Bell size={20} />
             </button>
@@ -111,14 +111,15 @@ const DashboardLayout = () => {
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#01332B] to-[#04B4A0] flex items-center justify-center text-white">
                 <User size={16} />
               </div>
-              <span className="hidden md:inline-block text-sm font-medium text-gray-700">
+              <span className="hidden md:inline-block text-sm font-medium text-white/80">
                 User Name
               </span>
             </div>
             <button
               onClick={handleLogout}
-              className="flex items-center px-3 py-1.5 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 transition-colors border border-red-100"
+              className="flex items-center px-3 py-1.5 text-sm font-medium text-red-400 rounded-lg hover:bg-red-900/30 hover:text-red-300 transition-all duration-300 font-rajdhani border border-red-500/50 tracking-wide"
             >
+                {/* x-5 py-2.5 bg-transparent border border-red-500/50 text-red-400 rounded-lg hover:bg-red-900/30 hover:text-red-300 transition-all duration-300 font-rajdhani front-medium tracking-wide */}
               <LogOut className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">Logout</span>
             </button>
@@ -126,8 +127,8 @@ const DashboardLayout = () => {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-6">
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm p-6 border border-gray-200">
+        <main className="flex-1 overflow-y-auto">
+          <div className="bg-white/60 backdrop-blur-sm rounded-xl shadow-sm  border-gray-200">
             <Outlet />
           </div>
         </main>

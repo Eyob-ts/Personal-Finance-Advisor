@@ -8,27 +8,37 @@ const SpendingByCategory = () => {
   const svgRef = useRef();
   const tooltipRef = useRef();
   const containerRef = useRef();
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [dimensions, setDimensions] = useState({ width: 400, height: 400 }); // Default dimensions
+  const [mounted, setMounted] = useState(false);
 
+  // Initialize and handle resize
   useEffect(() => {
-    if (!containerRef.current) return;
+    setMounted(true);
 
-    const handleResize = (entries) => {
-      const { width, height } = entries[0].contentRect;
-      setDimensions({ width, height });
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const width = containerRef.current.clientWidth;
+        const height = Math.min(width, 400); // Keep it square, max 400px height
+        setDimensions({ width, height });
+      }
     };
 
-    const observer = new ResizeObserver(handleResize);
-    observer.observe(containerRef.current);
+    // Initial measurement
+    updateDimensions();
+
+    // Add event listener for window resize
+    window.addEventListener('resize', updateDimensions);
 
     return () => {
-      observer.disconnect();
+      window.removeEventListener('resize', updateDimensions);
+      setMounted(false);
     };
   }, []);
 
   const { data: apiData, isLoading, error } = useQuery({
     queryKey: ['spendingByCategory'],
-    queryFn: getSpendingByCategory
+    queryFn: getSpendingByCategory,
+    staleTime: 1000 * 60 * 5 // 5 minutes
   });
 
   const transformData = useCallback((rawData) => {
@@ -42,45 +52,52 @@ const SpendingByCategory = () => {
   const chartData = transformData(apiData);
   const totalSpending = chartData.reduce((sum, item) => sum + item.value, 0);
 
+  // Draw chart
   useEffect(() => {
-    if (isLoading || error || chartData.length === 0 || dimensions.width === 0) return;
+    if (!mounted || isLoading || error || chartData.length === 0) return;
 
-    d3.select(svgRef.current).selectAll("*").remove();
-
-    const containerWidth = dimensions.width;
-    const containerHeight = Math.min(dimensions.width, 400);
-    const radius = Math.min(containerWidth, containerHeight) / 2;
+    const { width, height } = dimensions;
+    const radius = Math.min(width, height) / 2;
     const innerRadius = radius * 0.5;
 
-    const svg = d3.select(svgRef.current)
-      .attr("width", "100%")
-      .attr("height", "100%")
-      .attr("viewBox", `0 0 ${containerWidth} ${containerHeight}`)
+    // Clear previous SVG
+    const svg = d3.select(svgRef.current);
+    svg.selectAll("*").remove();
+
+    // Create SVG group centered in the container
+    const g = svg
+      .attr("width", width)
+      .attr("height", height)
       .append("g")
-      .attr("transform", `translate(${containerWidth / 2},${containerHeight / 2})`);
+      .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
-    // Add SVG background
-    svg.append("rect")
-      .attr("x", -containerWidth / 2)
-      .attr("y", -containerHeight / 2)
-      .attr("width", containerWidth)
-      .attr("height", containerHeight)
-      .attr("fill", "#F3F4F6"); // Tailwind's gray-100
-
+    // Color scale using your theme colors
     const color = d3.scaleOrdinal()
       .domain(chartData.map(d => d.name))
-      .range(['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316']);
+      .range([
+        '#0d9488', // teal-600
+        '#3b82f6', // blue-500
+        '#10b981', // emerald-500
+        '#f59e0b', // amber-500
+        '#ef4444', // red-500
+        '#8b5cf6', // violet-500
+        '#ec4899', // pink-500
+        '#14b8a6'  // teal-500
+      ]);
 
+    // Pie generator
     const pie = d3.pie()
       .value(d => d.value)
       .sort(null)
       .padAngle(0.02);
 
+    // Arc generator
     const arc = d3.arc()
       .innerRadius(innerRadius)
       .outerRadius(radius);
 
-    const arcs = svg.selectAll(".arc")
+    // Draw arcs
+    const arcs = g.selectAll(".arc")
       .data(pie(chartData))
       .enter()
       .append("g")
@@ -89,9 +106,8 @@ const SpendingByCategory = () => {
     arcs.append("path")
       .attr("d", arc)
       .attr("fill", d => color(d.data.name))
-      .attr("stroke", "#fff")
-      .attr("stroke-width", 2)
-      .attr("stroke-opacity", 0.8)
+      .attr("stroke", "#001A16") // Dark background color
+      .attr("stroke-width", 1)
       .style("opacity", 0)
       .transition()
       .duration(800)
@@ -102,30 +118,32 @@ const SpendingByCategory = () => {
         return t => arc(interpolate(t));
       });
 
-    svg.append("text")
+    // Center text
+    g.append("text")
       .attr("text-anchor", "middle")
       .attr("dy", "-0.5em")
-      .style("font-size", Math.min(16, radius * 0.15) + "px")
+      .style("font-size", "14px")
       .style("font-weight", "bold")
-      .style("fill", "#4B5563")
+      .style("fill", "#5EEAD4") // teal-300
       .text("Total")
       .style("opacity", 0)
       .transition()
       .delay(1000)
       .style("opacity", 1);
 
-    svg.append("text")
+    g.append("text")
       .attr("text-anchor", "middle")
       .attr("dy", "1.2em")
-      .style("font-size", Math.min(20, radius * 0.2) + "px")
+      .style("font-size", "16px")
       .style("font-weight", "bold")
-      .style("fill", "#1F2937")
+      .style("fill", "#FFFFFF")
       .text(`$${totalSpending.toLocaleString()}`)
       .style("opacity", 0)
       .transition()
       .delay(1000)
       .style("opacity", 1);
 
+    // Tooltip interactions
     arcs.on("mouseover", function(event, d) {
       d3.select(this).select("path")
         .transition().duration(200)
@@ -134,10 +152,10 @@ const SpendingByCategory = () => {
       d3.select(tooltipRef.current)
         .style("opacity", 1)
         .html(`
-          <div class="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
-            <p class="font-semibold text-gray-800">${d.data.name}</p>
-            <p class="text-gray-600">$${d.data.value.toLocaleString()}</p>
-            <p class="text-sm text-gray-500">
+          <div class="bg-[#01332B] p-3 rounded-lg shadow-lg border border-teal-500/30">
+            <p class="font-semibold text-teal-200">${d.data.name}</p>
+            <p class="text-teal-100">$${d.data.value.toLocaleString()}</p>
+            <p class="text-sm text-teal-300">
               ${((d.data.value / totalSpending) * 100).toFixed(1)}% of total
             </p>
           </div>
@@ -156,20 +174,19 @@ const SpendingByCategory = () => {
       d3.select(tooltipRef.current).style("opacity", 0);
     });
 
-  }, [chartData, isLoading, error, dimensions, totalSpending]);
+  }, [chartData, isLoading, error, dimensions, totalSpending, mounted]);
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-xl shadow-sm p-6 h-[400px] animate-pulse">
-        <div className="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
-        <div className="h-[300px] bg-gray-200 rounded-full"></div>
+      <div className="bg-[#01332B]/80 rounded-xl p-6 border border-teal-800/30 shadow-lg h-[400px] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 text-red-600 p-4 rounded-lg">
+      <div className="bg-red-900/30 border border-red-500/50 text-red-400 p-4 rounded-lg">
         Error loading spending data: {error.message}
       </div>
     );
@@ -177,17 +194,17 @@ const SpendingByCategory = () => {
 
   if (!chartData.length) {
     return (
-      <div className="bg-blue-500 rounded-xl shadow-sm p-6 text-center text-white">
+      <div className="bg-[#01332B]/80 rounded-xl p-6 border border-teal-800/30 shadow-lg text-center text-teal-200">
         <h3 className="text-lg font-semibold mb-2">Spending by Category</h3>
-        <p className="text-gray-100">No spending data available</p>
+        <p>No spending data available</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-100 dark:bg-gray-800 rounded-xl shadow-sm p-6">
+    <div className="bg-[#01332B]/80 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-teal-800/30 shadow-lg">
       <motion.h3
-        className="text-lg font-semibold mb-6 text-gray-800 dark:text-gray-200"
+        className="text-lg font-semibold mb-6 text-teal-100 font-rajdhani"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
@@ -195,12 +212,17 @@ const SpendingByCategory = () => {
         Spending by Category
       </motion.h3>
 
-      <div className="flex flex-col lg:flex-row gap-8 items-center">
+      <div className="flex flex-col lg:flex-row gap-6 items-center">
         <div
           ref={containerRef}
-          className="relative w-full aspect-square max-w-[400px] mx-auto"
+          className="relative w-full h-[300px] sm:h-[400px] max-w-[400px] mx-auto"
         >
-          <svg ref={svgRef} className="w-full h-full" preserveAspectRatio="xMidYMid meet" />
+          <svg
+            ref={svgRef}
+            width={dimensions.width}
+            height={dimensions.height}
+            className="w-full h-full"
+          />
           <div
             ref={tooltipRef}
             className="absolute pointer-events-none opacity-0 transition-opacity duration-200 z-50"
@@ -213,7 +235,7 @@ const SpendingByCategory = () => {
             .map((item, index) => (
               <motion.div
                 key={item.name}
-                className="flex items-center justify-between p-3 bg-white dark:bg-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+                className="flex items-center justify-between p-3 bg-[#002822]/50 rounded-lg hover:bg-[#002822] transition-colors"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
@@ -221,15 +243,20 @@ const SpendingByCategory = () => {
                 <div className="flex items-center space-x-3">
                   <div
                     className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316'][index % 8] }}
+                    style={{
+                      backgroundColor: [
+                        '#0d9488', '#3b82f6', '#10b981', '#f59e0b',
+                        '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'
+                      ][index % 8]
+                    }}
                   />
-                  <span className="font-medium text-gray-700 dark:text-gray-200">{item.name}</span>
+                  <span className="font-medium text-teal-100">{item.name}</span>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium text-gray-900 dark:text-white">
+                  <p className="font-medium text-teal-50">
                     ${item.value.toLocaleString()}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-teal-300">
                     {((item.value / totalSpending) * 100).toFixed(1)}%
                   </p>
                 </div>
