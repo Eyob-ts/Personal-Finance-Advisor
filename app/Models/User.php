@@ -3,14 +3,18 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Models\Finance\Budget;
+use App\Models\Finance\Goal;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -45,4 +49,40 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    //todo Relationship
+
+    //!Accounts
+    public function accounts()
+{
+    return $this->hasMany(account::class);
+}
+
+public function transactions()
+{
+    return $this->hasMany(Transaction::class);
+}
+
+public function categories()
+{
+    return $this->hasMany(Category::class);
+}
+
+public function budgets()
+{
+    return $this->hasMany(Budget::class);
+}
+
+public function goals()
+{
+    return $this->hasMany(Goal::class);
+}
+
+public function getBalanceAttribute()
+{
+    $income = $this->transactions()->where('type', 'income')->sum('amount');
+    $expense = $this->transactions()->where('type', 'expense')->sum('amount');
+    return $income - $expense;
+}
+
 }
